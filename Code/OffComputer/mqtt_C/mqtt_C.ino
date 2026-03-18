@@ -36,13 +36,19 @@ const int REQUIRED_STABLE_COUNT = 3;
 const int SAMPLE_COUNT = 10;
 const int SAMPLE_DELAY_MS = 3;
 
-// ========= LED =========
+// ========= Original LEDs =========
 #define LED1_PIN 6
 #define LED2_PIN 7
 #define LED_COUNT 8
 
 Adafruit_NeoPixel led1(LED_COUNT, LED1_PIN, NEO_GRB + NEO_KHZ800);  // controlled by topic A
 Adafruit_NeoPixel led2(LED_COUNT, LED2_PIN, NEO_GRB + NEO_KHZ800);  // controlled by topic B
+
+// ========= New C Strip =========
+#define LED3_PIN 8
+#define LED3_COUNT 10
+
+Adafruit_NeoPixel led3(LED3_COUNT, LED3_PIN, NEO_GRB + NEO_KHZ800); // C board special strip
 
 // ========= LED State Machine =========
 enum LedMode {
@@ -66,6 +72,26 @@ bool led2BlinkVisible = false;
 const unsigned long BLINK_DURATION_MS = 3000;
 const unsigned long BLINK_INTERVAL_MS = 250;
 
+// ========= Topic states =========
+bool stateAOn = false;
+bool stateBOn = false;
+
+// ========= C strip state =========
+enum CStripMode {
+  CSTRIP_OFF,
+  CSTRIP_FLASHING,
+  CSTRIP_SOLID
+};
+
+CStripMode cStripMode = CSTRIP_OFF;
+
+unsigned long cFlashStartMs = 0;
+unsigned long cLastToggleMs = 0;
+bool cFlashVisible = false;
+
+const int C_FLASH_COUNT = 2;                   
+const unsigned long C_FLASH_INTERVAL_MS = 180; 
+
 // ========= FSR State =========
 bool currentStateCOn = false;
 bool lastSentStateCOn = false;
@@ -77,42 +103,65 @@ unsigned long lastPublishMs = 0;
 const unsigned long republishInterval = 5000;
 
 // ===== Helper: set full strip color =====
-void setStripColor(Adafruit_NeoPixel &strip, uint32_t color) {
-  for (int i = 0; i < LED_COUNT; i++) {
+void setStripColor(Adafruit_NeoPixel &strip, int count, uint32_t color) {
+  for (int i = 0; i < count; i++) {
     strip.setPixelColor(i, color);
   }
   strip.show();
 }
 
+// ===== Fancy effect for LED3 =====
+uint32_t cyberColor(int x) {
+  x = x % 256;
+
+  if (x < 85) {
+    return led3.Color(0, x * 2, 255);
+  } else if (x < 170) {
+    x -= 85;
+    return led3.Color(x * 3, 0, 255);
+  } else {
+    x -= 170;
+    return led3.Color(255, 0, 255 - x * 3);
+  }
+}
+
+void renderFancyStrip3(int offset) {
+  for (int i = 0; i < LED3_COUNT; i++) {
+    int colorIndex = ((i * 80) + offset) & 255;
+    led3.setPixelColor(i, cyberColor(colorIndex));
+  }
+  led3.show();
+}
+
 // ===== Render LED1 based on current mode =====
 void renderLed1() {
   if (led1Mode == LED_ON) {
-    setStripColor(led1, led1.Color(0, 255, 0));
+    setStripColor(led1, LED_COUNT, led1.Color(0, 255, 0));
   }
   else if (led1Mode == LED_OFF) {
-    setStripColor(led1, led1.Color(0, 0, 0));
+    setStripColor(led1, LED_COUNT, led1.Color(0, 0, 0));
   }
   else if (led1Mode == LED_BLINKING_OFF) {
     if (led1BlinkVisible)
-      setStripColor(led1, led1.Color(0, 255, 0));
+      setStripColor(led1, LED_COUNT, led1.Color(0, 255, 0));
     else
-      setStripColor(led1, led1.Color(0, 0, 0));
+      setStripColor(led1, LED_COUNT, led1.Color(0, 0, 0));
   }
 }
 
 // ===== Render LED2 based on current mode =====
 void renderLed2() {
   if (led2Mode == LED_ON) {
-    setStripColor(led2, led2.Color(0, 0, 255));
+    setStripColor(led2, LED_COUNT, led2.Color(0, 0, 255));
   }
   else if (led2Mode == LED_OFF) {
-    setStripColor(led2, led2.Color(0, 0, 0));
+    setStripColor(led2, LED_COUNT, led2.Color(0, 0, 0));
   }
   else if (led2Mode == LED_BLINKING_OFF) {
     if (led2BlinkVisible)
-      setStripColor(led2, led2.Color(0, 0, 255));
+      setStripColor(led2, LED_COUNT, led2.Color(0, 0, 255));
     else
-      setStripColor(led2, led2.Color(0, 0, 0));
+      setStripColor(led2, LED_COUNT, led2.Color(0, 0, 0));
   }
 }
 
@@ -146,6 +195,78 @@ void led2StartBlinkingOff() {
   led2LastToggleMs = millis();
   led2BlinkVisible = true;
   renderLed2();
+}
+
+// ===== C strip control =====
+void cStripOff() {
+  cStripMode = CSTRIP_OFF;
+  setStripColor(led3, LED3_COUNT, led3.Color(0, 0, 0));
+}
+
+void cStripStartFlashing() {
+  cStripMode = CSTRIP_FLASHING;
+  cFlashStartMs = millis();
+  cLastToggleMs = millis();
+  cFlashVisible = true;
+  setStripColor(led3, LED3_COUNT, led3.Color(255, 255, 255));
+}
+
+void cStripStartSolid() {
+  cStripMode = CSTRIP_SOLID;
+}
+
+void updateCStripState() {
+  if (!currentStateCOn) {
+    cStripOff();
+    return;
+  }
+
+
+  if (stateAOn && stateBOn) {
+    cStripStartSolid();
+    return;
+  }
+
+  
+  if (cStripMode == CSTRIP_OFF) {
+    cStripStartFlashing();
+  }
+}
+
+void updateCStripEffect() {
+  static int flowOffset = 0;
+  unsigned long now = millis();
+
+  if (cStripMode == CSTRIP_FLASHING) {
+    if (now - cLastToggleMs >= C_FLASH_INTERVAL_MS) {
+      cFlashVisible = !cFlashVisible;
+      cLastToggleMs = now;
+
+      if (cFlashVisible) {
+        setStripColor(led3, LED3_COUNT, led3.Color(255, 255, 255));
+      } else {
+        setStripColor(led3, LED3_COUNT, led3.Color(0, 0, 0));
+      }
+    }
+
+    // 亮灭亮灭 = 4个间隔
+    if (now - cFlashStartMs >= (unsigned long)(C_FLASH_COUNT * 2 * C_FLASH_INTERVAL_MS)) {
+      if (stateAOn && stateBOn && currentStateCOn) {
+        cStripStartSolid();
+      } else {
+        cStripOff();
+      }
+    }
+  }
+  else if (cStripMode == CSTRIP_SOLID) {
+    
+    if (stateAOn && stateBOn && currentStateCOn) {
+      renderFancyStrip3(flowOffset);
+      flowOffset = (flowOffset + 20) & 255;
+    } else {
+      cStripOff();
+    }
+  }
 }
 
 // ===== Update blinking logic in loop =====
@@ -195,12 +316,14 @@ void onMqttMessage(char* topic, byte* payload, unsigned int length) {
   Serial.print(" = ");
   Serial.println(msg);
 
-// Topic A controls LED1
+  // Topic A controls LED1
   if (topicStr == sub_topic_A) {
     if (msg == "on") {
+      stateAOn = true;
       led1TurnOn();
     }
     else if (msg == "off") {
+      stateAOn = false;
       if (led1Mode == LED_ON) {
         led1StartBlinkingOff();
       }
@@ -210,14 +333,19 @@ void onMqttMessage(char* topic, byte* payload, unsigned int length) {
   // Topic B controls LED2
   if (topicStr == sub_topic_B) {
     if (msg == "on") {
+      stateBOn = true;
       led2TurnOn();
     }
     else if (msg == "off") {
+      stateBOn = false;
       if (led2Mode == LED_ON) {
         led2StartBlinkingOff();
       }
     }
   }
+
+  
+  updateCStripState();
 }
 
 // ===== Connect WiFi =====
@@ -314,14 +442,19 @@ void setup() {
 
   led1.begin();
   led2.begin();
+  led3.begin();
 
   led1.setBrightness(255);
   led2.setBrightness(255);
+  led3.setBrightness(150);
 
   led1.clear();
   led2.clear();
+  led3.clear();
+
   led1.show();
   led2.show();
+  led3.show();
 
   connectWiFi();
   connectMQTT();
@@ -337,6 +470,7 @@ void setup() {
 
   renderLed1();
   renderLed2();
+  updateCStripState();
 }
 
 void loop() {
@@ -353,6 +487,7 @@ void loop() {
   Serial.print("FSR = ");
   Serial.println(fsrValue);
 
+  bool prevStateCOn = currentStateCOn;
   updateFSRState(fsrValue);
 
   unsigned long now = millis();
@@ -361,6 +496,18 @@ void loop() {
     publishStateC(currentStateCOn);
     lastSentStateCOn = currentStateCOn;
     lastPublishMs = now;
+
+    if (!prevStateCOn && currentStateCOn) {
+      if (stateAOn && stateBOn) {
+        cStripStartSolid();
+      } else {
+        cStripStartFlashing();
+      }
+    }
+
+    if (prevStateCOn && !currentStateCOn) {
+      cStripOff();
+    }
   }
 
   if (now - lastPublishMs >= republishInterval) {
@@ -369,6 +516,7 @@ void loop() {
   }
 
   updateBlinkingLEDs();
+  updateCStripEffect();
 
-  delay(30);
+  delay(10);
 }

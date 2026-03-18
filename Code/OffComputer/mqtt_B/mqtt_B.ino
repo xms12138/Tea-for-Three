@@ -36,13 +36,19 @@ const int REQUIRED_STABLE_COUNT = 3;
 const int SAMPLE_COUNT = 10;
 const int SAMPLE_DELAY_MS = 3;
 
-// ========= LED =========
+// ========= Original LEDs =========
 #define LED1_PIN 6
 #define LED2_PIN 7
 #define LED_COUNT 8
 
 Adafruit_NeoPixel led1(LED_COUNT, LED1_PIN, NEO_GRB + NEO_KHZ800);  // controlled by topic A
 Adafruit_NeoPixel led2(LED_COUNT, LED2_PIN, NEO_GRB + NEO_KHZ800);  // controlled by topic C
+
+// ========= New B Strip =========
+#define LED3_PIN 8
+#define LED3_COUNT 10
+
+Adafruit_NeoPixel led3(LED3_COUNT, LED3_PIN, NEO_GRB + NEO_KHZ800); // B board special strip
 
 // ========= LED State Machine =========
 enum LedMode {
@@ -66,6 +72,26 @@ bool led2BlinkVisible = false;
 const unsigned long BLINK_DURATION_MS = 3000;
 const unsigned long BLINK_INTERVAL_MS = 250;
 
+// ========= Topic states =========
+bool stateAOn = false;
+bool stateCOn = false;
+
+// ========= B strip state =========
+enum BStripMode {
+  BSTRIP_OFF,
+  BSTRIP_FLASHING,
+  BSTRIP_SOLID
+};
+
+BStripMode bStripMode = BSTRIP_OFF;
+
+unsigned long bFlashStartMs = 0;
+unsigned long bLastToggleMs = 0;
+bool bFlashVisible = false;
+
+const int B_FLASH_COUNT = 2;
+const unsigned long B_FLASH_INTERVAL_MS = 180;
+
 // ========= FSR State =========
 bool currentStateBOn = false;
 bool lastSentStateBOn = false;
@@ -77,42 +103,65 @@ unsigned long lastPublishMs = 0;
 const unsigned long republishInterval = 5000;
 
 // ===== Helper: set full strip color =====
-void setStripColor(Adafruit_NeoPixel &strip, uint32_t color) {
-  for (int i = 0; i < LED_COUNT; i++) {
+void setStripColor(Adafruit_NeoPixel &strip, int count, uint32_t color) {
+  for (int i = 0; i < count; i++) {
     strip.setPixelColor(i, color);
   }
   strip.show();
 }
 
+// ===== Fancy effect for LED3 =====
+uint32_t cyberColor(int x) {
+  x = x % 256;
+
+  if (x < 85) {
+    return led3.Color(0, x * 2, 255);
+  } else if (x < 170) {
+    x -= 85;
+    return led3.Color(x * 3, 0, 255);
+  } else {
+    x -= 170;
+    return led3.Color(255, 0, 255 - x * 3);
+  }
+}
+
+void renderFancyStrip3(int offset) {
+  for (int i = 0; i < LED3_COUNT; i++) {
+    int colorIndex = ((i * 80) + offset) & 255;
+    led3.setPixelColor(i, cyberColor(colorIndex));
+  }
+  led3.show();
+}
+
 // ===== Render LED1 based on current mode =====
 void renderLed1() {
   if (led1Mode == LED_ON) {
-    setStripColor(led1, led1.Color(0, 255, 0));
+    setStripColor(led1, LED_COUNT, led1.Color(0, 255, 0));
   }
   else if (led1Mode == LED_OFF) {
-    setStripColor(led1, led1.Color(0, 0, 0));
+    setStripColor(led1, LED_COUNT, led1.Color(0, 0, 0));
   }
   else if (led1Mode == LED_BLINKING_OFF) {
     if (led1BlinkVisible)
-      setStripColor(led1, led1.Color(0, 255, 0));
+      setStripColor(led1, LED_COUNT, led1.Color(0, 255, 0));
     else
-      setStripColor(led1, led1.Color(0, 0, 0));
+      setStripColor(led1, LED_COUNT, led1.Color(0, 0, 0));
   }
 }
 
 // ===== Render LED2 based on current mode =====
 void renderLed2() {
   if (led2Mode == LED_ON) {
-    setStripColor(led2, led2.Color(0, 0, 255));
+    setStripColor(led2, LED_COUNT, led2.Color(0, 0, 255));
   }
   else if (led2Mode == LED_OFF) {
-    setStripColor(led2, led2.Color(0, 0, 0));
+    setStripColor(led2, LED_COUNT, led2.Color(0, 0, 0));
   }
   else if (led2Mode == LED_BLINKING_OFF) {
     if (led2BlinkVisible)
-      setStripColor(led2, led2.Color(0, 0, 255));
+      setStripColor(led2, LED_COUNT, led2.Color(0, 0, 255));
     else
-      setStripColor(led2, led2.Color(0, 0, 0));
+      setStripColor(led2, LED_COUNT, led2.Color(0, 0, 0));
   }
 }
 
@@ -146,6 +195,78 @@ void led2StartBlinkingOff() {
   led2LastToggleMs = millis();
   led2BlinkVisible = true;
   renderLed2();
+}
+
+// ===== B strip control =====
+void bStripOff() {
+  bStripMode = BSTRIP_OFF;
+  setStripColor(led3, LED3_COUNT, led3.Color(0, 0, 0));
+}
+
+void bStripStartFlashing() {
+  bStripMode = BSTRIP_FLASHING;
+  bFlashStartMs = millis();
+  bLastToggleMs = millis();
+  bFlashVisible = true;
+  setStripColor(led3, LED3_COUNT, led3.Color(255, 255, 255));
+}
+
+void bStripStartSolid() {
+  bStripMode = BSTRIP_SOLID;
+}
+
+void updateBStripState() {
+  if (!currentStateBOn) {
+    bStripOff();
+    return;
+  }
+
+  // B为on时：
+  // 如果A和C都已经on，则直接常亮
+  if (stateAOn && stateCOn) {
+    bStripStartSolid();
+    return;
+  }
+
+  // B为on，但A/C没全on，则闪两次
+  if (bStripMode == BSTRIP_OFF) {
+    bStripStartFlashing();
+  }
+}
+
+void updateBStripEffect() {
+  static int flowOffset = 0;
+  unsigned long now = millis();
+
+  if (bStripMode == BSTRIP_FLASHING) {
+    if (now - bLastToggleMs >= B_FLASH_INTERVAL_MS) {
+      bFlashVisible = !bFlashVisible;
+      bLastToggleMs = now;
+
+      if (bFlashVisible) {
+        setStripColor(led3, LED3_COUNT, led3.Color(255, 255, 255));
+      } else {
+        setStripColor(led3, LED3_COUNT, led3.Color(0, 0, 0));
+      }
+    }
+
+    // 亮灭亮灭 = 4个间隔
+    if (now - bFlashStartMs >= (unsigned long)(B_FLASH_COUNT * 2 * B_FLASH_INTERVAL_MS)) {
+      if (stateAOn && stateCOn && currentStateBOn) {
+        bStripStartSolid();
+      } else {
+        bStripOff();
+      }
+    }
+  }
+  else if (bStripMode == BSTRIP_SOLID) {
+    if (stateAOn && stateCOn && currentStateBOn) {
+      renderFancyStrip3(flowOffset);
+      flowOffset = (flowOffset + 20) & 255;
+    } else {
+      bStripOff();
+    }
+  }
 }
 
 // ===== Update blinking logic in loop =====
@@ -195,12 +316,14 @@ void onMqttMessage(char* topic, byte* payload, unsigned int length) {
   Serial.print(" = ");
   Serial.println(msg);
 
-// Topic A controls LED1
+  // Topic A controls LED1
   if (topicStr == sub_topic_A) {
     if (msg == "on") {
+      stateAOn = true;
       led1TurnOn();
     }
     else if (msg == "off") {
+      stateAOn = false;
       if (led1Mode == LED_ON) {
         led1StartBlinkingOff();
       }
@@ -210,14 +333,19 @@ void onMqttMessage(char* topic, byte* payload, unsigned int length) {
   // Topic C controls LED2
   if (topicStr == sub_topic_C) {
     if (msg == "on") {
+      stateCOn = true;
       led2TurnOn();
     }
     else if (msg == "off") {
+      stateCOn = false;
       if (led2Mode == LED_ON) {
         led2StartBlinkingOff();
       }
     }
   }
+
+  // A/C状态变化后，更新B灯带状态
+  updateBStripState();
 }
 
 // ===== Connect WiFi =====
@@ -314,14 +442,19 @@ void setup() {
 
   led1.begin();
   led2.begin();
+  led3.begin();
 
   led1.setBrightness(255);
   led2.setBrightness(255);
+  led3.setBrightness(150);
 
   led1.clear();
   led2.clear();
+  led3.clear();
+
   led1.show();
   led2.show();
+  led3.show();
 
   connectWiFi();
   connectMQTT();
@@ -337,6 +470,7 @@ void setup() {
 
   renderLed1();
   renderLed2();
+  updateBStripState();
 }
 
 void loop() {
@@ -353,6 +487,7 @@ void loop() {
   Serial.print("FSR = ");
   Serial.println(fsrValue);
 
+  bool prevStateBOn = currentStateBOn;
   updateFSRState(fsrValue);
 
   unsigned long now = millis();
@@ -361,6 +496,18 @@ void loop() {
     publishStateB(currentStateBOn);
     lastSentStateBOn = currentStateBOn;
     lastPublishMs = now;
+
+    if (!prevStateBOn && currentStateBOn) {
+      if (stateAOn && stateCOn) {
+        bStripStartSolid();
+      } else {
+        bStripStartFlashing();
+      }
+    }
+
+    if (prevStateBOn && !currentStateBOn) {
+      bStripOff();
+    }
   }
 
   if (now - lastPublishMs >= republishInterval) {
@@ -369,6 +516,7 @@ void loop() {
   }
 
   updateBlinkingLEDs();
+  updateBStripEffect();
 
-  delay(30);
+  delay(10);
 }
