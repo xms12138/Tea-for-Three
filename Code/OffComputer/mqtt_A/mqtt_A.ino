@@ -137,14 +137,14 @@ void renderFancyStrip3(int offset) {
 // ===== Render LED1 based on current mode =====
 void renderLed1() {
   if (led1Mode == LED_ON) {
-    setStripColor(led1, LED_COUNT, led1.Color(0, 255, 0));
+    setStripColor(led1, LED_COUNT, led1.Color(50, 250, 50));
   }
   else if (led1Mode == LED_OFF) {
     setStripColor(led1, LED_COUNT, led1.Color(0, 0, 0));
   }
   else if (led1Mode == LED_BLINKING_OFF) {
     if (led1BlinkVisible)
-      setStripColor(led1, LED_COUNT, led1.Color(0, 255, 0));
+      setStripColor(led1, LED_COUNT, led1.Color(50, 250, 50));
     else
       setStripColor(led1, LED_COUNT, led1.Color(0, 0, 0));
   }
@@ -153,14 +153,14 @@ void renderLed1() {
 // ===== Render LED2 based on current mode =====
 void renderLed2() {
   if (led2Mode == LED_ON) {
-    setStripColor(led2, LED_COUNT, led2.Color(0, 0, 255));
+    setStripColor(led2, LED_COUNT, led2.Color(255, 50, 0));
   }
   else if (led2Mode == LED_OFF) {
     setStripColor(led2, LED_COUNT, led2.Color(0, 0, 0));
   }
   else if (led2Mode == LED_BLINKING_OFF) {
     if (led2BlinkVisible)
-      setStripColor(led2, LED_COUNT, led2.Color(0, 0, 255));
+      setStripColor(led2, LED_COUNT, led2.Color(255, 50, 0));
     else
       setStripColor(led2, LED_COUNT, led2.Color(0, 0, 0));
   }
@@ -222,17 +222,18 @@ void updateAStripState() {
     return;
   }
 
-  // If A is ON and both B and C are already ON,
-  // directly enter the solid flowing effect
+  // 只有 A、B、C 都 ON 时，进入常亮动态效果
   if (stateBOn && stateCOn) {
-    aStripStartSolid();
+    if (aStripMode != ASTRIP_SOLID) {
+      aStripStartSolid();
+    }
     return;
   }
 
-  // If A is ON but B and C are not both ON,
-  // flash twice first
-  if (aStripMode == ASTRIP_OFF) {
-    aStripStartFlashing();
+  // 条件不满足时，不要因为 B/C 状态变化而重新闪两下
+  // 如果之前是常亮，就关掉
+  if (aStripMode == ASTRIP_SOLID) {
+    aStripOff();
   }
 }
 
@@ -320,36 +321,60 @@ void onMqttMessage(char* topic, byte* payload, unsigned int length) {
   Serial.print(" = ");
   Serial.println(msg);
 
+  bool stateChanged = false;
+
   // Topic B controls LED1
   if (topicStr == sub_topic_B) {
+    bool oldStateBOn = stateBOn;
+
     if (msg == "on") {
       stateBOn = true;
-      led1TurnOn();
+
+      if (!oldStateBOn) {
+        led1TurnOn();
+        stateChanged = true;
+      }
     }
     else if (msg == "off") {
       stateBOn = false;
-      if (led1Mode == LED_ON) {
-        led1StartBlinkingOff();
+
+      if (oldStateBOn) {
+        if (led1Mode == LED_ON) {
+          led1StartBlinkingOff();
+        }
+        stateChanged = true;
       }
     }
   }
 
   // Topic C controls LED2
   if (topicStr == sub_topic_C) {
+    bool oldStateCOn = stateCOn;
+
     if (msg == "on") {
       stateCOn = true;
-      led2TurnOn();
+
+      if (!oldStateCOn) {
+        led2TurnOn();
+        stateChanged = true;
+      }
     }
     else if (msg == "off") {
       stateCOn = false;
-      if (led2Mode == LED_ON) {
-        led2StartBlinkingOff();
+
+      if (oldStateCOn) {
+        if (led2Mode == LED_ON) {
+          led2StartBlinkingOff();
+        }
+        stateChanged = true;
       }
     }
   }
 
-  // Re-evaluate A strip state after receiving B/C updates
-  updateAStripState();
+  // 只有 B/C 状态真的变化时，才更新 A strip
+  if (stateChanged) {
+    updateAStripState();
+  }
 }
 
 // ===== Connect to WiFi =====
