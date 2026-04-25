@@ -28,8 +28,8 @@ const int FSR_PIN = A6;
 
 // Pressure detected  -> ON
 // No pressure        -> OFF
-const int PRESS_ON_THRESHOLD    = 320;
-const int RELEASE_OFF_THRESHOLD = 260;
+const int PRESS_ON_THRESHOLD    = 100;
+const int RELEASE_OFF_THRESHOLD = 70;
 
 const int REQUIRED_STABLE_COUNT = 3;
 
@@ -63,7 +63,7 @@ unsigned long led1BlinkStartMs = 0;
 unsigned long led1LastToggleMs = 0;
 bool led1BlinkVisible = false;
 
-// LED2 -> topic B -> blue
+// LED2 -> topic B -> orange
 LedMode led2Mode = LED_OFF;
 unsigned long led2BlinkStartMs = 0;
 unsigned long led2LastToggleMs = 0;
@@ -89,8 +89,8 @@ unsigned long cFlashStartMs = 0;
 unsigned long cLastToggleMs = 0;
 bool cFlashVisible = false;
 
-const int C_FLASH_COUNT = 2;                   
-const unsigned long C_FLASH_INTERVAL_MS = 180; 
+const int C_FLASH_COUNT = 2;
+const unsigned long C_FLASH_INTERVAL_MS = 180;
 
 // ========= FSR State =========
 bool currentStateCOn = false;
@@ -110,25 +110,61 @@ void setStripColor(Adafruit_NeoPixel &strip, int count, uint32_t color) {
   strip.show();
 }
 
-// ===== Fancy effect for LED3 =====
-uint32_t cyberColor(int x) {
-  x = x % 256;
+// ===== Warm tea ambience effect for LED3 =====
+uint32_t warmTeaColor(int breathPhase, int colorPhase) {
+  breathPhase &= 255;
+  colorPhase  &= 255;
 
-  if (x < 85) {
-    return led3.Color(0, x * 2, 255);
-  } else if (x < 170) {
-    x -= 85;
-    return led3.Color(x * 3, 0, 255);
+  // ===== 1. 强呼吸（幅度更大）=====
+  int breath;
+  if (breathPhase < 128) {
+    breath = 50 + (breathPhase * 205) / 127;   // 50 -> 255
   } else {
-    x -= 170;
-    return led3.Color(255, 0, 255 - x * 3);
+    breath = 50 + ((255 - breathPhase) * 205) / 127; // 255 -> 50
   }
+
+  // ===== 2. 红-琥珀-橙 茶色渐变 =====
+  int rBase, gBase, bBase;
+
+  if (colorPhase < 85) {
+    // 深红 → 琥珀
+    int t = colorPhase;
+    rBase = 255;
+    gBase = 60  + (t * 80) / 84;   // 60 → 140
+    bBase = 5   + (t * 10) / 84;   // 5  → 15
+  } 
+  else if (colorPhase < 170) {
+    // 琥珀 → 暖橙
+    int t = colorPhase - 85;
+    rBase = 255;
+    gBase = 140 + (t * 40) / 84;   // 140 → 180
+    bBase = 15  + (t * 10) / 84;   // 15 → 25
+  } 
+  else {
+    // 暖橙 → 深红（回环）
+    int t = colorPhase - 170;
+    rBase = 255;
+    gBase = 180 - (t * 120) / 85;  // 180 → 60
+    bBase = 25  - (t * 20) / 85;   // 25 → 5
+  }
+
+  // ===== 3. 呼吸亮度叠加 =====
+  int r = (rBase * breath) / 255;
+  int g = (gBase * breath) / 255;
+  int b = (bBase * breath) / 255;
+
+  return led3.Color(r, g, b);
 }
 
-void renderFancyStrip3(int offset) {
+void renderWarmTeaStrip3(int offset) {
   for (int i = 0; i < LED3_COUNT; i++) {
-    int colorIndex = ((i * 80) + offset) & 255;
-    led3.setPixelColor(i, cyberColor(colorIndex));
+    // colorPhase 决定每颗灯颜色略有差异，形成流动感
+    int colorPhase = offset + i * 20;
+
+    // breathPhase 让整条灯带一起呼吸，但稍微有一点空间差
+    int breathPhase = offset * 2 + i * 6;
+
+    led3.setPixelColor(i, warmTeaColor(breathPhase, colorPhase));
   }
   led3.show();
 }
@@ -152,14 +188,14 @@ void renderLed1() {
 // ===== Render LED2 based on current mode =====
 void renderLed2() {
   if (led2Mode == LED_ON) {
-    setStripColor(led2, LED_COUNT, led2.Color(255, 50, 0));
+    setStripColor(led2, LED_COUNT, led2.Color(250, 50, 0));
   }
   else if (led2Mode == LED_OFF) {
     setStripColor(led2, LED_COUNT, led2.Color(0, 0, 0));
   }
   else if (led2Mode == LED_BLINKING_OFF) {
     if (led2BlinkVisible)
-      setStripColor(led2, LED_COUNT, led2.Color(255, 50, 0));
+      setStripColor(led2, LED_COUNT, led2.Color(250, 50, 0));
     else
       setStripColor(led2, LED_COUNT, led2.Color(0, 0, 0));
   }
@@ -229,8 +265,6 @@ void updateCStripState() {
     return;
   }
 
-  // 条件不满足时，不要因为 A/B 状态变化而重新闪两下
-  // 如果之前是常亮，就关掉
   if (cStripMode == CSTRIP_SOLID) {
     cStripOff();
   }
@@ -252,7 +286,6 @@ void updateCStripEffect() {
       }
     }
 
-    // 亮灭亮灭 = 4个间隔
     if (now - cFlashStartMs >= (unsigned long)(C_FLASH_COUNT * 2 * C_FLASH_INTERVAL_MS)) {
       if (stateAOn && stateBOn && currentStateCOn) {
         cStripStartSolid();
@@ -262,10 +295,9 @@ void updateCStripEffect() {
     }
   }
   else if (cStripMode == CSTRIP_SOLID) {
-    
     if (stateAOn && stateBOn && currentStateCOn) {
-      renderFancyStrip3(flowOffset);
-      flowOffset = (flowOffset + 20) & 255;
+      renderWarmTeaStrip3(flowOffset);
+      flowOffset = (flowOffset + 2) & 255;
     } else {
       cStripOff();
     }
@@ -371,10 +403,7 @@ void onMqttMessage(char* topic, byte* payload, unsigned int length) {
 
   // 只有 A/B 状态真的变化时，才更新 C strip
   if (stateChanged) {
-    Serial.println("A/B state changed -> updateCStripState()");
     updateCStripState();
-  } else {
-    Serial.println("Repeated MQTT message ignored for C strip");
   }
 }
 
@@ -476,7 +505,7 @@ void setup() {
 
   led1.setBrightness(255);
   led2.setBrightness(255);
-  led3.setBrightness(150);
+  led3.setBrightness(180);
 
   led1.clear();
   led2.clear();
