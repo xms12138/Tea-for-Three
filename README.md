@@ -54,13 +54,28 @@ The product prototype must convey a sense of warmth, ritual and family togethern
 
 The initial design featured an oval-shaped tray with two indicator lights, a space for a teapot and a space for a teacup. The surface of the tray is engraved with curved patterns, which provide a stable base for the teacup and teapot, and also allow water droplets to flow along the grooves towards the drain. However, in view of waterproofing and electrical safety concerns, the load-bearing capacity of the tray material, and the uncertainty regarding the size of the teapot, this proposal was rejected. Instead, the solution adopted was to place a decorative teapot-style indicator on the tray.
 
+<div align="center">
+  <img src="https://raw.githubusercontent.com/xms12138/Tea-for-Three/main/Picture/5.1.png" alt="Initial Concept" width="50%">
+  <p><em>(Figure 5.1: Initial concept sketch of the oval tea tray design)</em></p>
+</div>
+
 ### 5.2 3D Printing Version
 
 Early versions attempted to use 3D printing technology to manufacture the entire device, including the casing, tray and decorative elements. However, this design presented a number of problems: the production cycle was lengthy, it required a large amount of material, and the finished product had a cheap feel to it, with rough surface details, making it difficult to meet the requirements of a household tea set. Furthermore, it proved quite challenging to neatly integrate sensors, wires and LED lights within a single printed component.
 
+<div align="center">
+  <img src="https://raw.githubusercontent.com/xms12138/Tea-for-Three/main/Picture/5.2.png" alt="3D Printing Version" width="50%">
+  <p><em>(Figure 5.2: Early 3D-printed prototype showing integrated tray and teapot form)</em></p>
+</div>
+
 ### 5.3 Laser-cut + 3D Print with Soft-wrapped Version
 
 The final version replaces the original single-printed body with a laser-cut plywood base and a 3D-printed shell. Wood was chosen for the tray material due to its inherent warmth, which naturally evokes a sense of calm and tranquillity. Furthermore, wood is well-suited to modular assembly and replication. This version also features a soft material (faux leather) wrapping the outer shell, enhancing the product's aesthetic appeal and lending it a homely feel. The decorative elements remain 3D-printed, and the teapot-shaped light diffuser is retained as the core design feature. This hybrid manufacturing approach makes the device easier to assemble, repair and replicate.
+
+<div align="center">
+  <img src="https://raw.githubusercontent.com/xms12138/Tea-for-Three/main/Picture/5.3.png" alt="Final Laser-cut Version" width="50%">
+  <p><em>(Figure 5.3: Final iteration combining laser-cut plywood base with 3D-printed shell and faux leather wrapping)</em></p>
+</div>
 
 ---
 
@@ -68,9 +83,16 @@ The final version replaces the original single-printed body with a laser-cut ply
 
 ### 6.1 Product Form
 
-*(外观照片待插入)*
-
 The 'Tea Gathering for Three' product comprises three interconnected ambient devices. These devices can be used in different spaces and remain synchronised via network communication. Each device features a cup-holding area that serves as the user interaction zone. There are also two indicator lights shaped like teacups and one shaped like a teapot. Each device is powered via USB, catering to the vast majority of usage scenarios.
+
+<div align="center">
+  <img src="https://raw.githubusercontent.com/xms12138/Tea-for-Three/main/Picture/6.1.1.png" height="280px">
+  &nbsp;&nbsp;
+  <img src="https://raw.githubusercontent.com/xms12138/Tea-for-Three/main/Picture/6.1.2.png" height="280px">
+  &nbsp;&nbsp;
+  <img src="https://raw.githubusercontent.com/xms12138/Tea-for-Three/main/Picture/6.1.3.png" height="280px">
+  <p><em>(Figure 6.1: Final prototype — three devices forming a complete Tea for Three set)</em></p>
+</div>
 
 ### 6.2 User Instruction
 
@@ -78,15 +100,15 @@ Once a user begins drinking tea, they place their teacup on the sensor area embe
 
 ### 6.3 System Components
 
-*(系统架构图待插入)*
-
-- Arduino MKR WiFi 1010
-- Adafruit NeoPixel Stick
-- FSR402 Force Sensitive Resistor
-- WS2812B RGB LED Strip
-- PLA Plastic
-- Maple Wood
-- Faux leather
+| Component | Image |
+|-----------|-------|
+| Arduino MKR WiFi 1010 | <img src="https://raw.githubusercontent.com/xms12138/Tea-for-Three/main/Picture/6.3Arduino%20MKR%20WiFi%201010.png" width="120px"> |
+| Adafruit NeoPixel Stick | <img src="https://raw.githubusercontent.com/xms12138/Tea-for-Three/main/Picture/6.3Adafruit%20NeoPixel%20Stick.png" width="120px"> |
+| FSR402 Force Sensitive Resistor | <img src="https://raw.githubusercontent.com/xms12138/Tea-for-Three/main/Picture/6.3FSR402%20Force%20Sensitive%20Resistor.png" width="120px"> |
+| WS2812B RGB LED Strip | <img src="https://raw.githubusercontent.com/xms12138/Tea-for-Three/main/Picture/6.3WS2812B%20RGB%20LED%20Strip.png" width="120px"> |
+| PLA Plastic | <img src="https://raw.githubusercontent.com/xms12138/Tea-for-Three/main/Picture/6.3PLA%20Plastic.png" width="120px"> |
+| Maple Wood | <img src="https://raw.githubusercontent.com/xms12138/Tea-for-Three/main/Picture/6.3Maple%20Wood.png" width="120px"> |
+| Faux Leather | <img src="https://raw.githubusercontent.com/xms12138/Tea-for-Three/main/Picture/6.3faux%20leather.png" width="120px"> |
 
 ---
 
