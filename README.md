@@ -1,22 +1,43 @@
 # Tea-for-Three
 Tea for Three is an interactive IoT installation where three connected devices communicate through touch, creating a shared experience between participants.
 
+## Team — Group 2
+
+| Member | Contribution |
+|---|---|
+| **Chaoshuo Han** | Hardware structure, sensing setup |
+| **Junrong Wang** | Enclosure modelling and visual design |
+| **Tianrui Min** | Product concept, circuit design and overall system integration |
+| **Zihang He** | Coding, communication logic |
+
+---
+
+## Links
+
+- **Demo Video:** [Watch on YouTube](https://www.youtube.com/watch?v=3P0uTwmVIM8)
+- **GitHub Repository:** [xms12138/Tea-for-Three](https://github.com/xms12138/Tea-for-Three)
+- **Source Code:** [Final version](https://github.com/xms12138/Tea-for-Three/tree/main/Code/Final_version)
+
+---
+
+## Support
+For questions or issues, please open an issue on this repository.
+
+---
 
 ## 1. Introduction
 
-Project "Tea for Three" is a set of three connected ambient tea devices designed to support a subtle sense of shared presence between close family members or friends living in different places. Developed in response to the theme: Connected Ambient Devices Across the Miles, the project explores how a familiar daily ritual can become a medium for remote connection. The following sections explain the design context, user problem, objectives and early design iterations that shaped the final prototype.
-
-*(可复现说明待补充)*
+"Tea for Three" is a set of three connected ambient tea devices designed to support a subtle sense of shared presence between close family members or friends living in different places. Developed in response to the theme: Connected Ambient Devices Across the Miles, the project explores how a familiar daily ritual can become a medium for remote connection. The following sections explain the design context, user problem, objectives and early design iterations that shaped the final prototype.
 
 ---
 
 ## 2. Literature Review
 
-"Tea for Three" draws on calm technology and ambient display research. Weiser and Brown (1997) argued that well-designed technology should move between the centre and periphery of human attention, informing users without constantly demanding focus. The idea of "Tea for Three" is closely related to ambient displays, which communicate information through subtle changes in light, sound or movement. Wisneski et al. (1998) showed how digital information can be embedded into physical space rather than displayed only on screens, while Mankoff et al. (2003) identified low cognitive load and intuitive state representation as important qualities for ambient displays. In this project, the LED feedback is intended to be glanceable and peripheral, so users can notice presence without actively reading a screen.
+"Tea for Three" draws on calm technology and peripheral interaction research. Building on Weiser and Brown's foundational vision, Bakker, van den Hoven, and Eggen (2015) argued that interactive systems should support both perception and physical interaction in the periphery of attention, allowing technology to embed into everyday routines without demanding focus. Bakker and Niemantsverdriet (2016) extended this with an "interaction-attention continuum," showing that well-designed systems should be usable across varying levels of attention. In "Tea for Three," the LED feedback is intended to operate in this peripheral mode — glanceable and ambient — so users can sense a remote partner's presence without actively reading a screen.
 
-The project also relates to minimal communication and remote presence. Conventional remote communication tools, such as messages, phone calls and video calls, are useful, but they require active initiation, attention and often language-based exchange. Kaye (2006) showed that even a minimal one-bit communication device could become emotionally meaningful when users shared an understanding of the gesture. "Tea for Three" applies this idea by reducing remote participation to one physical action: placing a cup.
+The project also connects with slow technology. Odom, Stolterman, and Chen (2022) extended Hallnäs and Redström's original theory through artifact analysis, identifying design qualities such as implicit slowness and ongoingness that characterise artifacts designed for reflection rather than efficiency. "Tea for Three" follows this direction: it does not notify, measure, or demand a reply. Instead, it creates a quiet shared moment through a familiar tea ritual.
 
-Finally, the project connects with slow technology. Hallnäs and Redström (2001) argued that technology can support reflection and presence rather than only efficiency. "Tea for Three" follows this direction: it does not notify, measure or demand a reply. Instead, it creates a quiet shared moment through a slow and familiar tea ritual.
+Within the Connected Environments research agenda, "Tea for Three" sits at the intersection of distributed IoT sensing and ambient interaction design. Rather than treating networked devices as tools for data exchange or remote control, the project explores how synchronised physical artifacts — communicating through MQTT and embedded force sensing — can mediate social presence across geographical distance. In doing so, it extends the concerns of connected environments from monitoring and automation toward the emotional and ritual dimensions of everyday domestic life.
 
 ---
 
@@ -34,21 +55,15 @@ Close relationships maintained across geographical distance often lose small dai
 
 ## 4. Project Objectives
 
-### 4.1 Conceptual and Emotional Objective
+The project pursues three connected objectives:
 
-"Tea for Three" aims to explore how connected devices can preserve the emotional bond between close family members or friends when sharing a cup of tea across a distance, building a bridge that conveys a sense of presence, care and companionship.
-
-### 4.2 Technical Objective
-
-The technical objective is to develop an interconnected system comprising three independent yet synchronously operating devices. Each device should detect interactions by local users and provide feedback to the other devices. The system prototype should be capable of gathering environmental information and communicating in real time over long distances.
-
-### 4.3 Design, Form and Commercialisation Objective
-
-The product prototype must convey a sense of warmth, ritual and family togetherness, whilst ensuring practicality in manufacturing and demonstrating commercial potential. Its design should be intuitive and visually appealing, capable of being mass-produced using feasible manufacturing methods, and suitable for further optimisation as a consumer-facing connected product.
+- **Conceptual:** explore how connected devices can preserve the emotional bond between close family or friends sharing tea across a distance, conveying presence, care and companionship.
+- **Technical:** develop three independent but synchronised devices that detect local interaction and communicate state to the others in real time over long distances.
+- **Design & commercialisation:** create a form that conveys warmth and ritual whilst remaining intuitive, replicable through feasible manufacturing methods, and suitable for further development as a consumer product.
 
 ---
 
-## 5. Design Iterations
+## 5. Form and Material Iterations
 
 ### 5.1 Initial Concept
 
@@ -77,13 +92,23 @@ The final version replaces the original single-printed body with a laser-cut ply
   <p><em>(Figure 5.3: Final iteration combining laser-cut plywood base with 3D-printed shell and faux leather wrapping)</em></p>
 </div>
 
+<div align="center">
+  <img src="https://raw.githubusercontent.com/xms12138/Tea-for-Three/main/Picture/top%20view.jpg" alt="Top View" width="50%">
+  <p><em>(Figure 5.4: Top view of the finished prototype showing the cup placement and LED feedback zones)</em></p>
+</div>
+
+<div align="center">
+  <img src="https://raw.githubusercontent.com/xms12138/Tea-for-Three/main/Picture/side%20view.jpg" alt="Side View" width="50%">
+  <p><em>(Figure 5.5: Side view of the final prototype with laser-cut plywood base and faux leather wrapping)</em></p>
+</div>
+
 ---
 
 ## 6. Prototype Overview
 
 ### 6.1 Product Form
 
-The 'Tea Gathering for Three' product comprises three interconnected ambient devices. These devices can be used in different spaces and remain synchronised via network communication. Each device features a cup-holding area that serves as the user interaction zone. There are also two indicator lights shaped like teacups and one shaped like a teapot. Each device is powered via USB, catering to the vast majority of usage scenarios.
+The "Tea for Three" product comprises three interconnected ambient devices. These devices can be used in different spaces and remain synchronised via network communication. Each device features a cup-holding area that serves as the user interaction zone. There are also two indicator lights shaped like teacups and one shaped like a teapot. Each device is powered via USB, catering to the vast majority of usage scenarios.
 
 <div align="center">
   <img src="https://raw.githubusercontent.com/xms12138/Tea-for-Three/main/Picture/6.1.1.png" height="280px">
@@ -114,29 +139,26 @@ Once a user begins drinking tea, they place their teacup on the sensor area embe
 
 ## 7. Final Prototype & Implementation
 
-This section details the hardware and software system implementation of the final Tea for Three prototype. The system consists of three identical physical devices, achieving low-latency remote state synchronization through IoT technology.
+This section details the hardware and software system implementation of the final Tea for Three prototype. The system consists of three identical physical devices, achieving low-latency remote state synchronisation through IoT technology.
 
 ### 7.1 Hardware & Circuit Design
 
 The core microcontroller of the system is the **Arduino MKR WiFi 1010**, combined with an **FSR402 force sensitive resistor** to detect the cup placement status, providing visual feedback via **WS2812B RGB and Adafruit NeoPixel Stick LED strips**.
 
-Regarding circuit wiring, to ensure the stable operation of multiple LEDs, the system utilizes an external, independent 5V power supply. The specific pin assignments are as follows:
+Regarding circuit wiring, to ensure the stable operation of multiple LEDs, the system utilises an external, independent 5V power supply. The specific pin assignments are as follows:
 
 - **LED Data Pins**: LED1 (representing participant B) is connected to `D6`, and LED2 (representing participant C) is connected to `D7`.
-- **Sensor Reading**: The FSR402 is connected to analog pin `A6` in series with a 10kΩ pull-down resistor connected to GND, ensuring the stability and accuracy of the 3.3V analog signal reading.
+- **Sensor Reading**: The FSR402 is connected to analog pin `A6` in series with a 10kΩ pull-down resistor connected to GND, ensuring the stability and accuracy of the 3.3V analogue signal reading.
 
-### 7.2 Software Architecture & WiFi Provisioning
+### 7.2 Software Architecture
 
-To enhance the system's robustness across different real-world network environments, the software architecture adopts a **Dual-Mode Operation**:
+The software follows a **dual-mode operation** model. On boot, the device first checks whether valid WiFi credentials exist in flash memory. If not, it enters **Config Mode** and opens an AP hotspot with a local web server at `192.168.4.1`, allowing users to enter network details through a browser. Once credentials are stored, the device automatically switches to **Normal Mode**, which runs the main MQTT loop, polls the FSR sensor, and drives the LED feedback. An automatic reconnection mechanism handles temporary disconnection.
 
-- **Config Mode**: When the device boots for the first time or the current network is unavailable, it automatically opens an AP hotspot and establishes a local web server. Users can connect to the hotspot via their mobile phones and dynamically input WiFi credentials on the web page, avoiding hardcoding the network configuration into the program.
-- **Normal Mode**: Automatically switches after a successful network configuration. It is responsible for executing the core MQTT loop, sensor polling, and LED control, and it includes an automatic reconnection mechanism upon disconnection.
+### 7.3 Sensor Input & MQTT Communication
 
-### 7.3 Sensor Debouncing & MQTT Communication
+To suppress noise from the analogue FSR readings, the input pipeline applies a moving average over 10 samples, a dual-threshold hysteresis (press ≥ 50, release ≤ 35) and a stable-count check requiring 3 consecutive matching cycles before a state change is confirmed. This combination eliminates flicker and false triggers in steady use.
 
-Due to the inherent data noise of physical sensors, the system implements a strict **debouncing algorithm** at the input end: it takes the average of 10 samples and sets a dual threshold (press >= 50, release <= 35). Only when a stable state is read for 3 consecutive cycles does the system confirm a state change, thereby greatly reducing false triggers.
-
-For inter-board communication, the system uses the lightweight **MQTT protocol** with a Pub/Sub topology. Each device acts as both a publisher and a subscriber. When the FSR state of Device A changes, it publishes an `"on"` or `"off"` payload to the `student/MUJI/hzh/A` topic; simultaneously, it subscribes to topics B and C. When all three devices receive an `"on"` signal from each other, the system triggers the "Warm flowing tea-light" animation in the teapot area, completing the final feedback of the collective shared moment.
+For inter-device communication, the system uses the lightweight **MQTT protocol** in a publish/subscribe topology. Each device acts as both a publisher and a subscriber. When the FSR state of Device A changes, it publishes an `"on"` or `"off"` payload to the `student/MUJI/hzh/A` topic, whilst subscribing to topics B and C. When all three devices report `"on"` simultaneously, the system triggers the "Warm flowing tea-light" animation in the teapot area, providing the collective feedback that marks a complete shared moment.
 
 <div align="center">
   <img src="https://raw.githubusercontent.com/xms12138/Tea-for-Three/main/Picture/lighting.jpg" alt="Lighting Effect" width="50%">
@@ -145,41 +167,25 @@ For inter-board communication, the system uses the lightweight **MQTT protocol**
 
 ---
 
-## 8. Design Iterations (Technical)
+## 8. Algorithm and Network Iterations
 
-The core challenge of this project lies in how to make distributed physical devices operate reliably in unstable network environments. Therefore, our iteration process primarily focused on **algorithm debouncing, network architecture optimization, and the design of fault-tolerance mechanisms**, while also including the evolution of the physical form to match the interaction logic.
+The core challenge of this project lies in how to make distributed physical devices operate reliably in unstable network environments. The iteration process therefore focused on **algorithm debouncing, network architecture optimisation, and the design of fault-tolerance mechanisms**.
 
 ### 8.1 Iteration of Sensor Reading Algorithm (Debouncing)
 
-Force sensitive resistors (FSR) in physical environments generate a significant amount of analog noise. We conducted three algorithmic iterations at the input layer:
+Force sensitive resistors (FSR) in physical environments generate a significant amount of analogue noise. Three algorithmic iterations were carried out at the input layer:
 
-1. **Initial Raw Reading:** Initially, we read the analog pin values directly. We found that even when the teacup was stationary, minor fluctuations in the values caused the lights to flicker frequently.
-2. **Moving Average:** We then introduced a smoothing algorithm that averaged 10 samples. This mitigated high-frequency noise, but at the critical point when the cup was just placed, there were still edge cases of the state rapidly bouncing back and forth.
-3. **Final Hysteresis & Stable Count:** Finally, we designed a **dual-threshold judgment with hysteresis** (press threshold set to 50, release threshold to 35) and added a counter: the state is only considered validly flipped when the condition is met for 3 consecutive cycles. This algorithm completely resolved the false trigger issue, ensuring absolute reliability of the input logic.
+1. **Initial Raw Reading:** Initially, the analogue pin values were read directly. Even when the teacup was stationary, minor fluctuations in the values caused the lights to flicker frequently.
+2. **Moving Average:** A smoothing algorithm was then introduced that averaged 10 samples. This mitigated high-frequency noise, but at the critical point when the cup was just placed, edge cases of the state rapidly bouncing back and forth still occurred.
+3. **Final Hysteresis & Stable Count:** Finally, a **dual-threshold judgment with hysteresis** (press threshold set to 50, release threshold to 35) was designed and a counter was added: the state is only considered validly flipped when the condition is met for 3 consecutive cycles. This algorithm completely resolved the false trigger issue, ensuring absolute reliability of the input logic.
 
 ### 8.2 Iteration of Network Architecture & Robustness
 
 The stability of multi-device collaborative work went through an iteration from "fragile" to "robust":
 
 1. **Hardcoded Connections:** In the early prototypes, WiFi credentials and the MQTT Broker were hardcoded into the code. This meant that whenever the testing location changed, the program had to be reflashed, completely lacking portability.
-2. **Captive Portal (Config Mode):** To solve this problem, we developed a provisioning mode. If there are no valid credentials in the Flash memory, the device boots as an AP (Router IP: 192.168.4.1), allowing users to configure the network via a local web page and save it to the Flash memory.
-3. **Failure Recovery & Periodic Sync:** Field tests revealed that occasional network jitter would cause devices to drop offline or lose packets. Therefore, in the final iteration, we added an **automatic recovery mechanism (`NVIC_SystemReset`)** and built a **periodic state publishing logic** on top of it. Even if a state-switch message is lost, the device periodically republishes its own state, ensuring that all devices — even those joining late or experiencing brief disconnections — ultimately achieve state synchronization.
-
-### 8.3 Iteration of Physical Form and Materials
-
-As the hardware algorithms matured, the exterior design underwent corresponding adjustments. Early on, we experimented with a unified, single-piece tea tray and 3D-printed PLA enclosures, but found them too "industrial" in both visual and tactile terms.
-
-Ultimately, we shifted to a **combination of laser-cut wood and cork**, introducing the design of an "Embedded Sensor Coaster." This iteration of materials and form not only concealed the complex internal wiring and sensors but also endowed the technological product with the warmth of "home," making the physical touch more aligned with the emotional tone of a "remote tea ritual."
-
-<div align="center">
-  <img src="https://raw.githubusercontent.com/xms12138/Tea-for-Three/main/Picture/top%20view.jpg" alt="Top View" width="50%">
-  <p><em>(Figure 8.1: Top view of the finished prototype showing the cup placement and LED feedback zones)</em></p>
-</div>
-
-<div align="center">
-  <img src="https://raw.githubusercontent.com/xms12138/Tea-for-Three/main/Picture/side%20view.jpg" alt="Side View" width="50%">
-  <p><em>(Figure 8.2: Final iteration using laser-cut wood and embedded sensors to enhance domestic aesthetics)</em></p>
-</div>
+2. **Captive Portal (Config Mode):** To solve this problem, a provisioning mode was developed. If there are no valid credentials in the flash memory, the device boots as an AP (Router IP: 192.168.4.1), allowing users to configure the network via a local web page and save it to the flash memory.
+3. **Failure Recovery & Periodic Sync:** Field tests revealed that occasional network jitter would cause devices to drop offline or lose packets. Therefore, in the final iteration, an **automatic recovery mechanism (`NVIC_SystemReset`)** was added, with a **periodic state publishing logic** built on top of it. Even if a state-switch message is lost, the device periodically republishes its own state, ensuring that all devices — even those joining late or experiencing brief disconnections — ultimately achieve state synchronisation.
 
 ---
 
@@ -197,26 +203,33 @@ Secondly, the medium for feedback is not sufficiently clear. In the current vers
 
 Thirdly, the overall technical standard of the prototype leaves room for improvement. As the experience relies on real-time synchronisation across multiple devices, unstable network connections can affect the smoothness of interactions. The physical construction also requires further optimisation, particularly regarding the quality of the casing, cable management, water resistance, portability and improvements for long-term use.
 
+### 9.3 Future Work
+
+Given more time, several directions could be pursued to develop the prototype into a more complete product. First, the interaction vocabulary could be expanded beyond binary presence to convey richer emotional states such as "waiting", "inviting" or "missing", potentially through gesture-based input, cup temperature sensing, or the duration of cup placement. Second, the ambient feedback medium could be enhanced with gradient lighting transitions, subtle soundscapes, or slow colour shifts that better capture the atmosphere of a shared tea moment rather than acting as a binary completion signal. Third, the physical construction would benefit from improved waterproofing, cable management and a battery option to support genuine long-term domestic use. Finally, a longitudinal field study with families or friends separated across time zones would help evaluate whether the device meaningfully supports a sense of remote companionship over weeks of real use, rather than in short demonstration sessions.
+
 ---
 
 ## 10. Conclusion
 
 Tea for Three explores how connected ambient devices can support emotional connection between family members or close friends who are physically separated. Instead of focusing on verbal communication, screens, or information exchange, the project uses a familiar tea-drinking ritual to create a subtle sense of shared presence across distance.
 
-Overall, the project shows that remote communication does not always need to be direct or attention-demanding. Small physical gestures and glanceable ambient feedback can create a softer form of connection. While the prototype still requires further refinement, it provides a clear foundation for a connected ambient product that transforms tea drinking into a shared remote experience.
+Overall, the project shows that remote communication does not always need to be direct or attention-demanding. Small physical gestures and glanceable ambient feedback can create a softer form of connection. Whilst the prototype still requires further refinement, it provides a clear foundation for a connected ambient product that transforms tea drinking into a shared remote experience.
 
 ---
 
 ## References
 
+Bakker, S. and Niemantsverdriet, K. (2016) 'The interaction-attention continuum: Considering various levels of human attention in interaction design', *International Journal of Design*, 10(2), pp. 1–14.
+
+Bakker, S., van den Hoven, E. and Eggen, B. (2015) 'Peripheral interaction: characteristics and considerations', *Personal and Ubiquitous Computing*, 19(1), pp. 239–254.
+
 Hallnäs, L. and Redström, J. (2001) 'Slow technology: Designing for reflection', *Personal and Ubiquitous Computing*, 5(3), pp. 201–212.
 
-Ishii, H. and Ullmer, B. (1997) 'Tangible bits: Towards seamless interfaces between people, bits and atoms', in *Proceedings of the SIGCHI Conference on Human Factors in Computing Systems*. New York: ACM, pp. 234–241.
-
-Kaye, J. (2006) 'I just clicked to say I love you: Rich evaluations of minimal communication', in *CHI '06 Extended Abstracts on Human Factors in Computing Systems*. New York: ACM, pp. 363–368.
-
-Mankoff, J., Dey, A.K., Hsieh, G., Kientz, J., Lederer, S. and Ames, M. (2003) 'Heuristic evaluation of ambient displays', in *Proceedings of the SIGCHI Conference on Human Factors in Computing Systems*. New York: ACM, pp. 169–176.
+Odom, W., Stolterman, E. and Chen, A.Y.S. (2022) 'Extending a theory of slow technology for design through artifact analysis', *Human–Computer Interaction*, 37(2), pp. 150–179.
 
 Weiser, M. and Brown, J.S. (1997) 'The coming age of calm technology', in Denning, P.J. and Metcalfe, R.M. (eds.) *Beyond Calculation: The Next Fifty Years of Computing*. New York: Springer, pp. 75–85.
 
-Wisneski, C., Ishii, H., Dahley, A., Gorbet, M., Brave, S., Ullmer, B. and Yarin, P. (1998) 'Ambient displays: Turning architectural space into an interface between people and digital information', in Streitz, N.A., Konomi, S. and Burkhardt, H.-J. (eds.) *Cooperative Buildings: Integrating Information, Organization, and Architecture*. Berlin: Springer, pp. 22–32.
+---
+
+## License
+MIT License — see [LICENSE](LICENSE) file for details.
